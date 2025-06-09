@@ -1,0 +1,13 @@
+## How to write a lexer in C?
+
+1. Define token types (enum for keywords, numbers, symbols, indentifiers, etc)
+
+2. Scan through your source string, one character at a time
+
+3. Group sequences of characters into tokens
+ - If you see a letter, read as long as it's a letter/number to get a keyword or identifier
+ - If you see a digit, read all digits for a number.
+ - If you see +, -, *, etc., treat as a symbol token.
+ - If you see whitespace, skip it.
+
+4. Return a list (array) of tokens
