@@ -138,6 +138,19 @@ error:
     return 0;
 }
 
+void generate_code(const AST* ast, const char* filename) {
+    FILE* out = fopen(filename, "w");
+    if (!out) {
+        perror("fopen");
+        exit(1);
+    }
+    fprintf(out, ".globl main\n");
+    fprintf(out, "main:\n");
+    fprintf(out, "  movl $%d, %%eax\n", ast->return_value);
+    fprintf(out, "  ret\n");
+    fclose(out);
+}
+
 int main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <sourcefile>\n", argv[0]);
@@ -162,7 +175,8 @@ int main(int argc, char **argv) {
     AST ast;
     if (parse(tokens, count, &ast)) {
         printf("Parsed successfully! Return value: %d\n", ast.return_value);
-        // You could now generate code using ast.return_value
+        generate_code(&ast, "output.s");
+        printf("Assembly written to output.s\n");
     } else {
         printf("Parsing failed.\n");
     }
