@@ -86,6 +86,58 @@ void print_tokens(Token* tokens, int count) {
     }
 }
 
+typedef struct {
+    int return_value;
+} AST;
+
+int parse(Token* tokens, int count, AST* ast) {
+    int pos = 0;
+
+    // 1. int
+    if (tokens[pos].type != TOKEN_INT) goto error;
+    pos++;
+
+    // 2. main (identifier with text "main")
+    if (tokens[pos].type != TOKEN_IDENTIFIER || strcmp(tokens[pos].text, "main")) goto error;
+    pos++;
+
+    // 3. (
+    if (tokens[pos].type != TOKEN_SYMBOL || strcmp(tokens[pos].text, "(")) goto error;
+    pos++;
+
+    // 4. )
+    if (tokens[pos].type != TOKEN_SYMBOL || strcmp(tokens[pos].text, ")")) goto error;
+    pos++;
+
+    // 5. {
+    if (tokens[pos].type != TOKEN_SYMBOL || strcmp(tokens[pos].text, "{")) goto error;
+    pos++;
+
+    // 6. return
+    if (tokens[pos].type != TOKEN_RETURN) goto error;
+    pos++;
+
+    // 7. number
+    if (tokens[pos].type != TOKEN_NUMBER) goto error;
+    ast->return_value = tokens[pos].value;
+    pos++;
+
+    // 8. ;
+    if (tokens[pos].type != TOKEN_SYMBOL || strcmp(tokens[pos].text, ";")) goto error;
+    pos++;
+
+    // 9. }
+    if (tokens[pos].type != TOKEN_SYMBOL || strcmp(tokens[pos].text, "}")) goto error;
+    pos++;
+
+    // Success!
+    return 1;
+
+error:
+    fprintf(stderr, "Parse error at token %d: '%s'\n", pos, tokens[pos].text);
+    return 0;
+}
+
 int main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <sourcefile>\n", argv[0]);
@@ -106,5 +158,12 @@ int main(int argc, char **argv) {
     Token tokens[256];
     int count = 0;
     lex(buf, tokens, &count);
-    print_tokens(tokens, count);
+
+    AST ast;
+    if (parse(tokens, count, &ast)) {
+        printf("Parsed successfully! Return value: %d\n", ast.return_value);
+        // You could now generate code using ast.return_value
+    } else {
+        printf("Parsing failed.\n");
+    }
 }
